@@ -1,7 +1,7 @@
 {
   "name": "Tap Electric Charger (Community)",
   "content_in_root": false,
-  "zip_release": true,
+  "zip_release": false,
   "filename": "tapelectric.zip",
   "render_readme": true,
   "homeassistant": "2024.11.0",
