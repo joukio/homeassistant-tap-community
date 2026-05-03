@@ -42,6 +42,7 @@ async def async_setup_entry(
         if not cid:
             continue
         entities.append(ResetButton(hass, entry, coord, client, cid))
+        entities.append(UnlockButton(hass, entry, coord, client, cid)) # [ADDED] Unlock Button
     async_add_entities(entities)
 
 
@@ -95,5 +96,46 @@ class ResetButton(CoordinatorEntity[TapCoordinator], ButtonEntity):
             )
         except TapElectricError as err:
             _LOGGER.error("Reset failed for %s: %s", self._cid, err)
+            raise
+        await self.coordinator.async_request_refresh()
+
+# [ADDED] ── Unlock Button ───────────────────────────────────────────────
+class UnlockButton(CoordinatorEntity[TapCoordinator], ButtonEntity):
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:lock-open-variant"
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        coord: TapCoordinator,
+        client: TapElectricClient,
+        charger_id: str,
+    ) -> None:
+        super().__init__(coord)
+        self._hass = hass
+        self._entry = entry
+        self._client = client
+        self._cid = charger_id
+        self._attr_unique_id = f"{charger_id}_unlock"
+        self._attr_name = "Unlock Cable"
+
+        c = coord.data.charger(charger_id) or {}
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, charger_id)},
+            manufacturer=c.get("brand") or MANUFACTURER,
+            name=c.get("name") or f"Tap Charger {charger_id[:8]}",
+            model=c.get("model") or c.get("brand"),
+            sw_version=c.get("firmwareVersion"),
+            hw_version=c.get("serialNumber"),
+        )
+
+    async def async_press(self) -> None:
+        _ensure_write_enabled(self._hass, self._entry)
+        try:
+            await self._client.unlock_connector(self._cid)
+            _LOGGER.info("Unlock requested on %s", self._cid)
+        except TapElectricError as err:
+            _LOGGER.error("Unlock failed for %s: %s", self._cid, err)
             raise
         await self.coordinator.async_request_refresh()
