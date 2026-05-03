@@ -38,6 +38,8 @@ PATH_TARIFFS = "/tariffs"
 # ── Write endpoints (⚠️ need live test) ──────────────────────────────────
 PATH_CHARGER_OCPP_SEND = "/chargers/{charger_id}/ocpp"    # POST
 PATH_CHARGER_RESET = "/chargers/{charger_id}/reset"        # POST
+PATH_CHARGER_UNLOCK = "/chargers/{charger_id}/unlock-connector" # POST [ADDED]
+PATH_CHARGER_REMOTE_START = "/chargers/{charger_id}/remote-start" # POST [ADDED]
 
 # ── OCPP message passthrough ────────────────────────────────────────────
 # Tap doesn't expose direct "remote start / remote stop" endpoints. Writing
@@ -128,6 +130,7 @@ CONF_CHARGER_ID = "charger_id"
 CONF_WEBHOOK_SECRET = "webhook_secret"
 CONF_MAX_CHARGE_AMPS = "max_charge_amps"
 CONF_MIN_CHARGE_AMPS = "min_charge_amps"
+CONF_RFID_TAG = "rfid_tag" # [ADDED] Config key for stored RFID code
 
 # ── Advanced mode (Firebase-authenticated management API) ──────────────
 # Optional upgrade on top of the basic sk_ API key. Advanced mode enables
