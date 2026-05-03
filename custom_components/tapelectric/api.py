@@ -315,22 +315,30 @@ class TapElectricClient:
             "POST", PATH_CHARGER_RESET, charger_id=charger_id,
         )
         
-    # [ADDED] ── New Direct Commands ─────────────────────────────────────────
+# [ADDED] ── New Direct Commands (Via OCPP Passthrough) ──────────────────
 
     async def unlock_connector(self, charger_id: str) -> Any:
-        """Send an unlock connector command."""
-        return await self._request(
-            "POST", PATH_CHARGER_UNLOCK, charger_id=charger_id,
-        )
+        """Send an UnlockConnector command via OCPP passthrough."""
+        # OCPP 1.6 payload for unlocking the cable
+        payload = {
+            "action": "UnlockConnector",
+            "payload": {
+                "connectorId": 1
+            }
+        }
+        return await self.send_ocpp_message(charger_id, payload)
 
     async def remote_start(self, charger_id: str, tag_id: str) -> Any:
-        """Start a charging session with a specific RFID tag."""
-        payload = {"idTag": tag_id, "connectorId": 1}
-        return await self._request(
-            "POST", PATH_CHARGER_REMOTE_START,
-            json=payload, charger_id=charger_id,
-        )
-
+        """Start a charging session via OCPP RemoteStartTransaction."""
+        # OCPP 1.6 payload for starting a transaction with an RFID
+        payload = {
+            "action": "RemoteStartTransaction",
+            "payload": {
+                "idTag": tag_id,
+                "connectorId": 1
+            }
+        }
+        return await self.send_ocpp_message(charger_id, payload)
 
     # ── External meter push (experimental — Tap's ExternalMeterData
     # contract isn't in the public reference for this key scope; the
