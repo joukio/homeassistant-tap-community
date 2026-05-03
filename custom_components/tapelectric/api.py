@@ -34,6 +34,8 @@ from .const import (
     PATH_METER_DATA_PUSH,
     PATH_SESSION_METER_DATA,
     PATH_TARIFFS,
+    PATH_CHARGER_UNLOCK,       # [ADDED]
+    PATH_CHARGER_REMOTE_START, # [ADDED]
 )
 from .ocpp import reset as ocpp_reset
 from .ocpp import set_charging_profile
@@ -312,6 +314,23 @@ class TapElectricClient:
         return await self._request(
             "POST", PATH_CHARGER_RESET, charger_id=charger_id,
         )
+        
+    # [ADDED] ── New Direct Commands ─────────────────────────────────────────
+
+    async def unlock_connector(self, charger_id: str) -> Any:
+        """Send an unlock connector command."""
+        return await self._request(
+            "POST", PATH_CHARGER_UNLOCK, charger_id=charger_id,
+        )
+
+    async def remote_start(self, charger_id: str, tag_id: str) -> Any:
+        """Start a charging session with a specific RFID tag."""
+        payload = {"idTag": tag_id, "connectorId": 1}
+        return await self._request(
+            "POST", PATH_CHARGER_REMOTE_START,
+            json=payload, charger_id=charger_id,
+        )
+
 
     # ── External meter push (experimental — Tap's ExternalMeterData
     # contract isn't in the public reference for this key scope; the

@@ -31,6 +31,7 @@ from .const import (
     CONF_BASE_URL,
     CONF_CHARGER_ID,
     CONF_WEBHOOK_SECRET,
+    CONF_RFID_TAG, # [ADDED] Import for the RFID config key
     DEFAULT_BASE_URL,
     DEFAULT_OPTIONS,
     DOMAIN,
@@ -298,6 +299,25 @@ def _register_services(hass: HomeAssistant) -> None:
             _LOGGER.error("reset_charger %s: %s", charger_id, err)
             raise
 
+    # [ADDED] ── Start Charging Service Handler ──────────────────────────────
+    async def _start_charging(call: ServiceCall) -> None:
+        charger_id = call.data["charger_id"]
+        client, entry = _resolve(hass, charger_id)
+        ensure_write_enabled(hass, entry)
+        
+        # Pull RFID from the automation payload, or fallback to integration config
+        tag_id = call.data.get("tag_id") or entry.options.get(CONF_RFID_TAG) or entry.data.get(CONF_RFID_TAG)
+        
+        if not tag_id:
+            raise HomeAssistantError(f"No RFID tag configured for charger {charger_id}. Please add 'tag_id' to your service call payload or configure it in the integration.")
+
+        try:
+            await client.remote_start(charger_id, tag_id)
+            _LOGGER.info("start_charging successfully called on %s with RFID %s", charger_id, tag_id)
+        except TapElectricError as err:
+            _LOGGER.error("start_charging failed for %s: %s", charger_id, err)
+            raise
+
     async def _push_meter(call: ServiceCall) -> None:
         """Forward an external meter reading to Tap's load-balancing API.
 
@@ -333,6 +353,7 @@ def _register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(DOMAIN, "resume_charging", _resume)
     hass.services.async_register(DOMAIN, "set_charging_limit", _set_limit)
     hass.services.async_register(DOMAIN, "reset_charger", _reset)
+    hass.services.async_register(DOMAIN, "start_charging", _start_charging) # [ADDED] Register Start Service
     hass.services.async_register(DOMAIN, "push_external_meter_data", _push_meter)
 
 
