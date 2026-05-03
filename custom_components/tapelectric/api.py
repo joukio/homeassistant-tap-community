@@ -314,7 +314,7 @@ class TapElectricClient:
         return await self._request(
             "POST", PATH_CHARGER_RESET, charger_id=charger_id,
         )
-        
+
     # [ADDED] ── New Direct Commands (Via OCPP Passthrough) ──────────────────
 
     async def unlock_connector(self, charger_id: str) -> Any:
