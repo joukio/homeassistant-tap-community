@@ -106,3 +106,20 @@ push_external_meter_data:
       name: Measured at
       required: false
       selector: {datetime: {}}
+
+start_charging:
+  name: Start Charging Session
+  description: Starts a charging session with a specific RFID tag.
+  fields:
+    charger_id:
+      name: Charger ID
+      description: The ID of the charger.
+      required: true
+      selector:
+        text:
+    tag_id:
+      name: RFID Tag ID
+      description: (Optional) The specific RFID Tag. E.g. TAP-12345-678.
+      required: false
+      selector:
+        text:
