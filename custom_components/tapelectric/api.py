@@ -322,7 +322,7 @@ class TapElectricClient:
         # OCPP 1.6 payload for unlocking the cable
         payload = {
             "action": "UnlockConnector",
-            "payload": {
+            "data": {  # Changed from 'payload' to 'data'
                 "connectorId": 1
             }
         }
@@ -333,7 +333,7 @@ class TapElectricClient:
         # OCPP 1.6 payload for starting a transaction with an RFID
         payload = {
             "action": "RemoteStartTransaction",
-            "payload": {
+            "data": {  # Changed from 'payload' to 'data'
                 "idTag": tag_id,
                 "connectorId": 1
             }
